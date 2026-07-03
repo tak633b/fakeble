@@ -15,11 +15,15 @@ Fakeble packages the reproducible parts:
 
 | Piece | What it does | Install target |
 |---|---|---|
-| `claude-md/fakeble.md` | Procedural pre-response check + silence rule + response shape | append to `~/.claude/CLAUDE.md` |
-| `skills/companion-state` | Teaches the model to maintain a curated state file about you / your project | `~/.claude/skills/` |
+| `claude-md/fakeble.md` | Procedural pre-response check, silence rule, behind-the-request / decision-consistency / people rules, same-turn state upsert | append to `~/.claude/CLAUDE.md` |
+| `skills/companion-state` | Maintain a curated state file about you / your project | `~/.claude/skills/` |
 | `skills/catchup` | Low-token session catch-up: state file first, primary sources only when needed | `~/.claude/skills/` |
+| `skills/hypothesis-ledger` | Keep evidence attributed to hypotheses during long investigations | `~/.claude/skills/` |
+| `skills/framing-library` | Bank named structural insights; re-apply deep judgments by classification | `~/.claude/skills/` |
+| `skills/self-calibration` | Counterfactual salience checks, variance probes, mistake log | `~/.claude/skills/` |
 | `hooks/reinjection` | Optional: re-inject the check every turn (for models that drift in long sessions) | `~/.claude/settings.json` |
-| `templates/` | Starting points for the state file and a style few-shot file | your project |
+| `templates/` | Starting points for the state file, framings library, and style few-shot | your project |
+| `experiments/` | Reproducible A/B scenarios + blind-judged results | (reference) |
 
 ## Install
 

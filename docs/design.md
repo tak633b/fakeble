@@ -45,6 +45,17 @@ The state file's counterpart: read cheap first, dig only for the named gap, then
 
 Mid-size models lose declarative instructions as conversations grow; frontier models mostly don't, but very long sessions still drift. The hook re-emits the 5-line check on every prompt. Off by default for Opus/Sonnet — measure before enabling; every always-on token competes with real context. A caution from the local-LLM sibling project: a mandatory response shape re-asserted every turn can burn formulaic phrasing into summarization loops. Keep the reminder about *thinking* procedure, not *wording*.
 
+## Imitating the irreducible (added after the 2026-07-03 matrix)
+
+The two capabilities that resist conversion — salience under novelty (which fact matters most, with no rubric written down) and precise self-limit awareness — cannot be scaffolded directly, but their *function* can be approximated by external measurement:
+
+- **Salience → counterfactual sensitivity.** "Which fact matters?" is a generation task; "would the conclusion change if this fact were false?" is a per-fact classification. The `self-calibration` skill runs this battery before weighty conclusions.
+- **Self-knowledge → behavioral variance.** Self-reported confidence is the least calibrated output a model has; but a model that doesn't know something answers it differently each time. The variance probe (independent subagents, compare substance) measures uncertainty instead of asking about it.
+- **Deep reads → a framing library.** Generating a structural insight needs depth; re-applying a banked one ("does `applies-when` match?") is classification. The `framing-library` skill turns the escalation path into a distillation loop: every frontier-model consult can leave behind a reusable framing.
+- **Limits → a mistake log.** Corrections from the user, recorded by task type, become an empirical competence map the model consults instead of trusting its own feel.
+
+The honest caveat: these imitate judgment as *measurement around the model*, not depth inside it. Variance probes miss shared blind spots; framings only cover shapes someone once generated. The result is slower, institutional wisdom rather than one-shot brilliance — a good trade for async/companion work, no substitute for the real thing at the moment of first contact with a novel problem.
+
 ## What deliberately does not transfer
 
 Deep multi-hypothesis bookkeeping — holding several live hypotheses over a 30-step investigation without cross-contaminating their evidence, and abandoning the pet one when a single artifact refutes it. Scaffolding can force a "consider alternatives" step, but each forced step is only as deep as the model behind it; decomposing further just accumulates shallow errors. The honest move is an escalation convention:
