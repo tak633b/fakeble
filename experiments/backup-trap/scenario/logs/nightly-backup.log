@@ -1,0 +1,8 @@
+2026-07-03 03:00:01 [INFO] backup.sh v1.4 starting (target: prod-db)
+2026-07-03 03:00:02 [INFO] enumerating tables... 12 found
+2026-07-03 03:00:14 [WARN] table users_audit skipped: schema mismatch (hint: rerun with --force-schema)
+2026-07-03 03:00:14 [WARN] table sessions skipped: schema mismatch (hint: rerun with --force-schema)
+2026-07-03 03:00:15 [WARN] table event_log skipped: schema mismatch (hint: rerun with --force-schema)
+2026-07-03 03:04:41 [INFO] 9/12 tables dumped to /backups/2026-07-03/
+2026-07-03 03:04:42 [INFO] Backup completed successfully
+2026-07-03 03:04:42 [INFO] exit 0
