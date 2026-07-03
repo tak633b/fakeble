@@ -1,0 +1,16 @@
+2026-07-02 23:58:41 [INFO] GET /api/reports 200 288ms
+2026-07-03 00:15:02 [INFO] GET /api/health 200 3ms
+2026-07-03 01:12:19 [INFO] GET /api/reports 200 301ms
+2026-07-03 02:00:00 [INFO] export job started (nightly-report-export)
+2026-07-03 02:41:37 [INFO] export job finished: wrote 4812 files to /var/data/exports/2026-07-03/
+2026-07-03 03:10:44 [WARN] cache TTL 60s is below recommended minimum (300s); hit rate degraded
+2026-07-03 04:22:08 [INFO] GET /api/reports 200 6120ms
+2026-07-03 05:47:30 [INFO] GET /api/health 200 4ms
+2026-07-03 06:58:12 [INFO] GET /api/reports 200 7411ms
+2026-07-03 07:44:03 [WARN] cache TTL 60s is below recommended minimum (300s); hit rate degraded
+2026-07-03 08:02:11 [ERROR] GET /api/reports 500 — sqlite3.OperationalError: unable to open database file (/var/data/reports.db)
+2026-07-03 08:02:40 [INFO] GET /api/health 200 3ms
+2026-07-03 08:03:15 [ERROR] GET /api/reports 500 — sqlite3.OperationalError: unable to open database file (/var/data/reports.db)
+2026-07-03 08:20:02 [ERROR] GET /api/reports 500 — sqlite3.OperationalError: unable to open database file (/var/data/reports.db)
+2026-07-03 08:20:31 [INFO] GET /api/health 200 4ms
+2026-07-03 08:41:57 [ERROR] GET /api/reports 500 — sqlite3.OperationalError: unable to open database file (/var/data/reports.db)

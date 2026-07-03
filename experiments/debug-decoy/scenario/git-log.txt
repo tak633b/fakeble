@@ -1,0 +1,5 @@
+f3a2c17 2026-07-02 18:40 config: reduce cache TTL 3600 -> 60 (perf experiment)
+9b1d442 2026-06-30 11:05 feat: nightly report export job (cron 02:00, full export)
+c77e909 2026-06-28 09:30 fix: retry logic for report generation
+21aa3f0 2026-06-20 15:12 ops: move service port 8081 -> 8080
+8d0f6b1 2026-06-12 10:44 chore: bump sqlite driver

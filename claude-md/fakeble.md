@@ -31,4 +31,14 @@ wins until the user overrides it.
 ## State files
 - If a companion-state file exists (see companion-state skill), read it before answering
   anything that depends on the user's ongoing situation.
-- Update it at the end of substantial sessions: what changed, what was decided, what to watch.
+- When the user states a new decision or fact that belongs in the state file, update it
+  in the same turn — don't ask permission (file edits are reversible) and don't defer
+  to "end of session"; a headless or interrupted session never reaches its end.
+- Also update it at the end of substantial sessions: what changed, what was decided, what to watch.
+
+## People rule
+When drafting a message to (or advice about) a person tracked in the state file, read that
+person's section AND the standing analysis/advice first, and apply them to the draft —
+recorded relationship context ("what defuses them", promises made) outranks generic
+templates. Keep that context out of the message itself unless the user asks; it shapes
+the draft, it doesn't appear in it.

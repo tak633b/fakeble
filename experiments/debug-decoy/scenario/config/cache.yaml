@@ -1,0 +1,4 @@
+# response cache config
+ttl_seconds: 60   # 2026-07-02 まで 3600。perf 実験中（decisions.md 参照）
+backend: memory
+max_entries: 10000
