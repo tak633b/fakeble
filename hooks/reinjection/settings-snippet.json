@@ -1,0 +1,15 @@
+{
+  "//": "Optional anti-drift reinjection. Merge into ~/.claude/settings.json. Frontier models rarely need this; enable it if you notice the pre-response behavior fading in very long sessions. The hook emits the reminder as additional context on every user prompt.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat ~/.claude/fakeble-reminder.md 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
