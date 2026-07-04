@@ -34,6 +34,8 @@ One more line from that conversation, because it's the actual research program h
 | `skills/hypothesis-ledger` | Keep evidence attributed to hypotheses during long investigations | `~/.claude/skills/` |
 | `skills/framing-library` | Bank named structural insights; re-apply deep judgments by classification | `~/.claude/skills/` |
 | `skills/self-calibration` | Counterfactual salience checks, variance probes, a mistake log | `~/.claude/skills/` |
+| `skills/bootstrap` | Day-zero interview that generates your first state file and framings | `~/.claude/skills/` |
+| `skills/escalation-queue` | Bank frontier-depth questions; distill answered ones into framings | `~/.claude/skills/` |
 | `hooks/reinjection` | Optional anti-drift reminder for very long sessions (off by default) | `~/.claude/settings.json` |
 | `templates/` | Starting points: state file, framings library, style few-shot | your project |
 | `experiments/` | Reproducible A/B scenarios, method, and blind-judged results | reference |
@@ -46,6 +48,10 @@ git clone https://github.com/tak633b/fakeble && cd fakeble && ./install.sh
 ```
 
 The installer copies the skills and asks before touching your `CLAUDE.md`. Manual install: copy `skills/*` into `~/.claude/skills/`, append `claude-md/fakeble.md` to your `~/.claude/CLAUDE.md`, and start a state file from `templates/companion-state.template.md`.
+
+Prefer plugins? Fakeble also installs as a Claude Code plugin (`/plugin marketplace add`, skills only, CLAUDE.md stays consented) — see [docs/install-as-plugin.md](docs/install-as-plugin.md).
+
+First run: ask for the **bootstrap** skill ("set up fakeble") — a five-minute interview that generates your first `companion-state.md` instead of leaving you with empty templates.
 
 ## The three rules that matter most
 

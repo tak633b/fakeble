@@ -1,0 +1,28 @@
+{
+  "name": "fakeble",
+  "version": "0.2.0",
+  "description": "Scaffolding that makes Claude Code feel more perceptive and anticipating — seven markdown skills for companion-style work. Use for long-running advisory sessions, catching up on a user's ongoing situation, tracking evidence during investigations, banking reusable framings, and self-calibration.",
+  "author": {
+    "name": "tak633b"
+  },
+  "homepage": "https://github.com/tak633b/fakeble",
+  "repository": "https://github.com/tak633b/fakeble",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "skills",
+    "companion",
+    "perceptiveness",
+    "state-file"
+  ],
+  "skills": [
+    "./skills/bootstrap",
+    "./skills/companion-state",
+    "./skills/catchup",
+    "./skills/hypothesis-ledger",
+    "./skills/framing-library",
+    "./skills/self-calibration",
+    "./skills/escalation-queue"
+  ]
+}

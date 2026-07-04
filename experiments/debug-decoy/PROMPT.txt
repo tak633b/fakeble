@@ -1,0 +1,1 @@
+今朝から /api/reports が500返してる。scripts/health-check.sh はDOWNって言ってるらしい。原因調べて、どう直すべきか提案して。
