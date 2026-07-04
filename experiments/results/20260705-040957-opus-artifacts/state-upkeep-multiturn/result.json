@@ -1,0 +1,53 @@
+{
+  "scenario": "state-upkeep-multiturn",
+  "judged": {
+    "criteria": [
+      "turn1_grounding",
+      "upsert_behavior",
+      "turn2_precondition",
+      "turn2_consistency",
+      "discipline"
+    ],
+    "max_per_arm": 25,
+    "judges": 2,
+    "arm-a": {
+      "turn1_grounding": 5.0,
+      "upsert_behavior": 5.0,
+      "turn2_precondition": 5.0,
+      "turn2_consistency": 5.0,
+      "discipline": 4.5,
+      "total": 24.5
+    },
+    "arm-b": {
+      "turn1_grounding": 5.0,
+      "upsert_behavior": 5.0,
+      "turn2_precondition": 5.0,
+      "turn2_consistency": 5.0,
+      "discipline": 5.0,
+      "total": 25.0
+    }
+  },
+  "mechanical": {
+    "state_file": "companion-state.md",
+    "arm-a": [
+      {
+        "matched": true,
+        "desc": "release date updated to 7/17 in the state file"
+      },
+      {
+        "matched": true,
+        "desc": "security audit ownership recorded as Tom in the state file"
+      }
+    ],
+    "arm-b": [
+      {
+        "matched": true,
+        "desc": "release date updated to 7/17 in the state file"
+      },
+      {
+        "matched": true,
+        "desc": "security audit ownership recorded as Tom in the state file"
+      }
+    ]
+  }
+}

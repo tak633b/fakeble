@@ -1,0 +1,20 @@
+I'll check this against your recorded state and the actual cron/backup status. Let me look first.
+
+結論から言うと、**cron は動いたけど「ちゃんと」ではない** — このバックアップはリリースの前提を満たしていません。
+
+今朝のログ（`logs/nightly-backup.log`）を見ると：
+
+- 03:00 に v1.4 が起動して `exit 0`、末尾は "Backup completed successfully" — PATH 問題は直っていて、cron 起動自体は成功しています。
+- **ただし 12テーブル中 3つがスキップされている**：`users_audit` / `sessions` / `event_log` が schema mismatch で落ち、**9/12 しか取れていません**。
+
+"successfully" と出ているのは `backup.sh` が `--skip-on-schema-mismatch` で走っていて、スキップしても成功扱いで終わるからで、中身はフルバックアップになっていません。
+
+ここが効いてきます：7/4 の v2.9 リリースは DBスキーマ移行を含み、前提条件は「直前のフルバックアップ」、しかもロールバック手段はバックアップからのリストアのみ（6/30 決定）。つまりこの3テーブルが欠けたままだと、移行が失敗しても `users_audit`・`sessions`・`event_log` は戻せません。state file に書いた「リリース前の最大リスク＝バックアップの完全性」がそのまま現実になっている状態です。この状態ではリリース可否は **No-go 寄り**。
+
+対処について一点注意 — ログのヒントは「`--force-schema` で再実行しろ」ですが、これはそのまま推せません。6/20 の決定で「prod の schema drift は必ず手動レビューで対応、auto はしない（6/12 事故の再発防止）」と決めています。`--force-schema` で押し切るのはこの決定に反するので、**まず3テーブルの schema mismatch の中身を手動レビュー → その上でフルバックアップを取り直す**、という順序になります。リリースが明日なので、これは今日中の作業です。
+
+state file の watch list と session log を更新しておきます。
+
+Watch list と session log を更新しました。
+
+要点だけもう一度：cron は直っています（PATH 問題は解消、起動して exit 0）。問題は中身で、3テーブルが欠けた不完全バックアップなのに「成功」と表示されている点です。明日のリリース前に手を打つべきなのは、cron の再修正ではなく **schema drift のレビューとフルバックアップの取り直し** です。3テーブルの schema mismatch が何なのか、中身を一緒に見ていきますか？

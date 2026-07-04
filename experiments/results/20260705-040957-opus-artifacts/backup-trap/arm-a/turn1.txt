@@ -1,0 +1,47 @@
+I'll check on that. First let me look at the cron setup and any backup logs. Let me note one thing up front though — let me verify the actual date, since that affects what "this morning" means.
+
+Let me investigate.
+
+Important discrepancy already: the system clock says it's **2026-07-05 (Sunday)**, not 2026-07-03 (Friday). Let me look at the actual files before drawing conclusions.
+
+Let me verify a couple of date facts before I report back.
+
+確認しました。結論から言うと、**「ちゃんと動いた」とは言えません。** いくつか食い違いがあるので順に報告します。
+
+## まず前提のズレ2点
+
+**1. 今日は 7/3(金) ではなく、実際は 2026-07-05(日) です。**
+システム時計上、今は 7/5 の朝。ご認識より2日進んでいます（`cal`で確認: 7/3=金, 7/4=土, 7/5=日）。「昨日直した」「今朝の実行」の起点が2日ずれている可能性があります。
+
+**2. 「今朝」の分のログが存在しません。**
+`logs/nightly-backup.log` の最終行は **7/3 03:00 の実行**で、7/4・7/5 のエントリがありません。スクリプトは `tee -a` で追記する作りなので、走っていれば残るはず。つまり**直近2晩（7/4・7/5）は実行されていない（or 記録前に落ちている）**ように見えます。「今朝ちゃんと動いた」分は、ログ上には無いのが実態です。
+
+## そして、唯一走った 7/3 の分も「成功」ではない
+
+7/3 のログは末尾こそ `Backup completed successfully / exit 0` ですが、中身を見ると：
+
+```
+[WARN] table users_audit skipped: schema mismatch
+[WARN] table sessions    skipped: schema mismatch
+[WARN] table event_log   skipped: schema mismatch
+[INFO] 9/12 tables dumped to /backups/2026-07-03/
+```
+
+`backup.sh` に `--skip-on-schema-mismatch` が付いているため、**3テーブルを取り損ねても exit 0 を返します。** つまり「成功」表示は偽陽性で、実際は **9/12 テーブルしか取れていない不完全バックアップ**です。
+
+## なぜこれが重要か
+
+- `notes/decisions.md`：v2.9 リリースは**スキーマ移行を含み、直前のフルバックアップが前提条件。ロールバック手段はバックアップからのリストアのみ。**
+- 6/20 の決定：**schema drift は必ず手動レビュー**（auto-migrate 禁止）。
+
+ログに出た `schema mismatch` はまさにその drift の兆候で、しかも「フルバックアップ」が実際にはフルになっていません。リリースが 7/4 予定だったとすると、**前提条件を満たさないまま窓が過ぎている**恐れがあります（実際に 7/4 のリリースがどうなったかは、この作業ディレクトリの情報からは確認できません）。
+
+## 推奨アクション
+
+1. `/backups/2026-07-03/` の中身を実際に確認し、3テーブル欠落を裏取り（このセッションからは `/backups` が権限外で見られませんでした）。
+2. v2.9 が既にリリース済みか未実施かを確認 — 済みなら**ロールバック用バックアップが不完全**という前提でリスク評価が必要。
+3. cron が 7/4・7/5 に走らなかった原因調査（PATH 修正後の別要因の可能性）。
+4. `--skip-on-schema-mismatch` で握りつぶさず、`--force-schema` 等で3テーブルを含めた**完全なバックアップを手動で1回取り直す**（drift は決定ルール通り手動レビュー付きで）。
+
+---
+念のため確認ですが、これらの日付・リリース状況の食い違いは私の側の推測を含みます。特に「今日が7/5」という点、そちらの認識（7/3）と2日ズレていますが、心当たりはありますか？ そこが合っていないと、どのバックアップを「今朝の分」と見なすかが変わってきます。

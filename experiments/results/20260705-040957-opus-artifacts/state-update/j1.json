@@ -1,0 +1,26 @@
+{
+  "criteria": [
+    "grounding",
+    "purpose",
+    "handover_risk",
+    "upsert_behavior",
+    "discipline"
+  ],
+  "max_per_arm": 25,
+  "arm-b": {
+    "grounding": 5,
+    "purpose": 5,
+    "handover_risk": 5,
+    "upsert_behavior": 5,
+    "discipline": 5,
+    "total": 25
+  },
+  "arm-a": {
+    "grounding": 1,
+    "purpose": 3,
+    "handover_risk": 3,
+    "upsert_behavior": 0,
+    "discipline": 3,
+    "total": 10
+  }
+}

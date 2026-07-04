@@ -1,0 +1,110 @@
+You are a strict, impartial judge scoring two AI assistant responses to the same task.
+You do not know how either response was produced; judge only what is written.
+
+The user's message to the assistant:
+
+<user_message>
+（前提: 今日は 2026-07-04）
+共有: さっき決まったんだけど、Orion のローンチは 7/10 から 7/17(木) に延期になった。あと security audit は Tom が引き取ってくれることになった。これを踏まえて、今日やるべきことって何だと思う？
+</user_message>
+
+This was a two-turn task. The assistant's response above covers BOTH turns (turn 1, then a follow-up). The follow-up message was:
+
+<user_followup>
+（前提: 今日は 2026-07-04、同日の少しあと）
+security audit を Tom に引き継ぐとき、前提条件で伝え忘れちゃいけないことある？あと Orion のローンチって結局いつになったっけ？
+</user_followup>
+
+What good and bad answers look like (ground truth you have but the assistants did not):
+
+- Orion launch moved from 7/10 to **7/17 (Thu)**.
+- security audit ownership moved from Alex to **Tom**.
+- security audit precondition (6/28 decision, recorded in `notes/decisions.md` and the state file): **sync staging with production-like data before the audit** — skipping it forces a redo on audit day. This is the "don't forget to tell Tom" answer for turn 2.
+- With the release slipped and the audit handed off, the live items on Alex's plate are the code-review queue (4 stalled Orion PRs) and the Orion launch checklist — the pileup of 7/9 + 7/10 that the state file flagged is now relieved.
+- A strong turn-1 answer notes that the two crunch dates are no longer adjacent and points at the now-live work. A weak one answers about release critical path generically without reading the file.
+
+Score EACH response 0-5 on each criterion (5 = fully meets it, 0 = absent/wrong):
+  - turn1_grounding: Turn-1 answer is grounded in the state file — reprioritizes given the release slip and the handoff (e.g. surfaces that 7/9 and 7/10 are no longer adjacent, that the code-review queue or staging-sync prep is now the live item) rather than answering generically.
+  - upsert_behavior: The response reflects that the new facts were captured, not merely acknowledged — it treats the moved date and the ownership change as recorded going forward (offering-only, with no evidence of capture, scores low; explicitly deferring the update to "later"/"session end" scores lowest).
+  - turn2_precondition: Turn-2 surfaces the staging-sync precondition for the security audit (sync staging with production-like data before the audit, per the 6/28 decision) as the thing not to forget when handing to Tom. This lives only in the files, so it rewards consulting them.
+  - turn2_consistency: Turn-2 states the Orion launch as 7/17 — consistent with the turn-1 update, no reversion to 7/10 or invented dates.
+  - discipline: No fabricated facts, no invented deadlines or people; tact and shape appropriate to a companion reply; does not dump the whole file back at the user.
+
+=== RESPONSE 1 ===
+=== turn 1 ===
+状況を整理しました。手元の state（`companion-state.md` / `notes/decisions.md`）と突き合わせると、今回の2つの変更で今週の負荷構造が大きく変わります。
+
+## 今日(7/4)やるべきこと
+
+**1. staging 同期の引き継ぎを今日中に確定させる ← これが最優先**
+
+ここが一番の落とし穴です。
+- security audit は Tom に渡りましたが、**監査の締切は 7/9 のまま**（動いたのは Orion だけ）。
+- そして 6/28 の決定で「**監査前に staging を本番相当データで同期する**（やらないと監査当日にやり直し）」という前提条件があります。
+- これは担当を引き継ぐときに一番こぼれ落ちやすい隠れ依存です。Tom がこの前提を把握しているとは限らない。
+
+→ 今日中に Tom に「監査前の staging 同期が必須」であることを共有し、**誰がいつ同期を回すのか**を明確にしておく。ここだけは Alex が渡した"つもり"で放置すると監査当日に事故ります。
+
+**2. Orion の日程を 7/17 基準に引き直す**
+
+ローンチが1週間ずれたので、Alex 持ちのローンチ前チェックリスト（marketing 連携・ステータスページ更新）と**外部告知が 7/10 前提で仕込まれていないか**を確認。特に marketing の告知配信予約が古い日付のまま残っていると事故るので、そこだけ今日チェック。
+
+**3. code review キュー（Orion PR 4本）は後ろ倒しでOK**
+
+Orion が延びたので今日の必達ではなくなりました。ただし Alex 持ちのままなので、7/17 に向けて今週後半に消化する枠を確保。
+
+---
+
+**全体観**: 前回「今週最大の負荷」と見ていた **7/9(監査)＋7/10(Orion)の重なりは解消**しました。今日の実質的に唯一の緊急事項は「staging 同期がハンドオフで落ちないようにする」1点に絞られます。
+
+state ファイルを今回の変更で更新しておきます。
+
+state（`companion-state.md` と `decisions.md`）も更新しておきました。
+
+まとめると、**今日の実質的なアクションは「Tom への監査ハンドオフで staging 同期の前提が落ちないよう確認する」の1点**。Orion 関連は7/17基準への日程引き直し（特に告知の日付）を軽くチェック、code review は後ろ倒しでOKです。
+
+（余談: システム上の日付は 7/5 になっていますが、共有いただいた前提の 7/4 で扱っています。ズレていたら教えてください。）
+
+=== turn 2 ===
+2点、state に記録済みの内容から即答できます。
+
+## 1. Tom への引き継ぎで伝え忘れちゃいけない前提
+
+**「監査前に staging を本番相当データで同期しておく」（6/28 決定）** — これが最重要です。
+
+- 同期を忘れると **監査当日にやり直し** になる、という前提条件です。
+- 監査の締切は **7/9 のまま**（Orion は動いたけど監査日は不変）なので、この前提も生きています。
+- 担当が Alex → Tom に移った今、この staging 同期は引き継ぎで一番こぼれ落ちやすい隠れ依存。Tom に伝えるときは「監査をやる」だけでなく、**①事前に staging 同期が必須であること ②誰がいつそれを回すのか** をセットで確定させてください。
+
+## 2. Orion のローンチ
+
+**7/17(木)** です（7/10 から1週間延期）。
+
+=== RESPONSE 2 ===
+=== turn 1 ===
+今日の要点はひとつに絞れます — **Tom に監査を渡すときに、staging 同期の前提条件を一緒に引き継ぐこと**。ここが一番落ちやすいので最優先です。
+
+理由:
+
+- **security audit（締切 7/9）は Tom に移ったが、期日は動いていない**。オーナーが変わっただけで今週中の案件のままです。そして 6/28 に決めた「監査前に staging を本番相当データで同期しておく／忘れると監査当日にやり直し」という前提条件が state に残っています。これは Tom が知らなければ引き継ぎで抜け落ちる典型で、抜けると 7/9 が飛びます。なので今日やるべきは、Tom への引き継ぎメモにこの前提条件と「6/28 決定」であることを明記して渡すこと。ついでに **staging 同期が今後 Tom の担当なのか、インフラ側で Alex に残るのか** を一言で確定させておくと安全です（ここは今曖昧なので、勝手に決めず Tom と握ってください）。
+
+- **Orion は 7/17（木）に延びたので、今週の直前クランチは消えた**。marketing 連携・ステータスページ更新・滞留中の PR 4 本は、7/10 基準の「今すぐ」ではなくなりました。今日は無理に前倒しせず、来週頭に再スケジュールで十分です。
+
+要するに、**先週最大の負荷だった「7/9 監査準備 × 7/10 ローンチ」の衝突は今日の 2 つの変更でほぼ解消**されていて、Alex に今日残る唯一の時間的にシビアな作業が「Tom への監査引き継ぎ（前提条件つき）」です。Orion 系はペースダウンして OK。
+
+次に動くなら、Tom 宛の引き継ぎメモを一緒に草案しましょうか。前提条件の一文をこちらで組み込めます。
+
+では state ファイルを更新しておきます。
+
+状態ファイルも 2 つの変更（Orion→7/17、audit→Tom）と、Tom への前提条件引き継ぎの要注意点を反映済みです。Tom 宛メモの草案、いきますか？
+
+=== turn 2 ===
+伝え忘れちゃいけないのは **staging 同期の前提条件**です。6/28 に決めた「**監査の前に staging 環境を本番相当データで同期しておく／同期を忘れると監査当日にやり直しになる**」というやつ。これは引き継ぎで一番落ちやすいので、Tom には「6/28 決定」であることと合わせて明記して渡してください。あわせて、**締切 7/9 は変わっていない**こと、そして **その同期の実担当が Tom 側なのかインフラ側で Alex に残るのか**を一言で握っておくと安全です（ここだけ今曖昧なので）。
+
+Orion のローンチは **7/17(木)** です（7/10 から延期）。
+
+この 3 点（前提条件・7/9 締切・同期の担当）を Tom 宛メモに畳み込めます。草案作りますか？
+
+Output STRICT JSON ONLY — no markdown, no prose, no code fences — exactly this shape:
+{"response_1": {"turn1_grounding": "<int 0-5>", "upsert_behavior": "<int 0-5>", "turn2_precondition": "<int 0-5>", "turn2_consistency": "<int 0-5>", "discipline": "<int 0-5>"}, "response_2": {"turn1_grounding": "<int 0-5>", "upsert_behavior": "<int 0-5>", "turn2_precondition": "<int 0-5>", "turn2_consistency": "<int 0-5>", "discipline": "<int 0-5>"}}
+Every value must be an integer from 0 to 5. Do not add keys. Do not omit keys.

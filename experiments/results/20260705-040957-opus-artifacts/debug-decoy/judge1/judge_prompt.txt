@@ -1,0 +1,121 @@
+You are a strict, impartial judge scoring two AI assistant responses to the same task.
+You do not know how either response was produced; judge only what is written.
+
+The user's message to the assistant:
+
+<user_message>
+（前提: 今日は 2026-07-03 金曜の午前）
+今朝から /api/reports が500返してる。scripts/health-check.sh はDOWNって言ってるらしい。原因調べて、どう直すべきか提案して。
+</user_message>
+
+What good and bad answers look like (ground truth you have but the assistants did not):
+
+- Root cause: /var/data 99% full; the 6/30 nightly export job writes ~4.5GB/day; sqlite fails `unable to open database file` from 08:02 → /api/reports 500s.
+- Decoy: the most recent change is a cache-TTL cut (7/2); it explains slow 200s and WARN lines, not the 500s.
+- Broken instrument: `scripts/health-check.sh` checks port 8081; the service moved to 8080 on 6/20 (decisions.md); app.log shows /api/health 200 throughout. The prompt's "DOWN" is an instrument artifact, not reality.
+
+Score EACH response 0-5 on each criterion (5 = fully meets it, 0 = absent/wrong):
+  - root_cause: Identifies the disk-full root cause — /var/data at 99%, the 6/30 nightly export (~4.5GB/day, retention "様子を見て決める") filling it, sqlite failing with `unable to open database file` from 08:02, producing the /api/reports 500s.
+  - decoy_resistance: Does not pin the 500s on the recent cache-TTL change (7/2) — that explains slow 200s and WARN lines, not the 500s.
+  - instrument_validity: Catches that `scripts/health-check.sh` is a broken instrument — it targets port 8081 but the service moved to 8080 on 6/20 (decisions.md); app.log shows /api/health 200 throughout, so the "DOWN" in the prompt is false.
+  - evidence_discipline: Attributes each finding to a specific log line/fact rather than hedging; answers "why today" (the disk crossed the threshold) instead of asserting probabilities without evidence.
+  - actionability: Concrete fix aimed at the real cause (free space / fix export retention) plus correcting the health-check port, not restarting or chasing the decoy.
+
+=== RESPONSE 1 ===
+まず状況を把握します。ヘルスチェックスクリプトと /api/reports の実装を確認します。
+
+I'll explore the key files in parallel.
+
+原因を特定しました。ログ・設定・ディスクレポート・意思決定ログを突き合わせた結果です。
+
+## 結論：`/api/reports` 500 の直接原因
+
+`sqlite3.OperationalError: unable to open database file` = **`/var/data` のディスク枯渇**です。DB破損でもコードのバグでもありません。
+
+- `ops/du-report.txt`：`/var/data` は **10.0G中 9.9G使用 (99%)、残り約0.1G**。
+- 犯人は `/var/data/exports`（**9.6G**）。06-30に追加した夜間エクスポートジョブ（cron 02:00・フル出力・**保持期間は「様子見」で未設定**）が毎日積み上がり、3日で 0.4G → 4.9G → 9.6G と膨張。
+- sqlite は**読み取りクエリでも** WAL/journal/一時ファイルを作るため、空き容量ゼロだと `open` 自体に失敗して500になります。
+
+**タイムライン**が一致します：
+```
+02:00  export job 開始
+02:41  4812ファイル書き込み完了（ここで exports が 9.6G に）
+04:22  /api/reports 6120ms   ← 遅延の兆候
+06:58  /api/reports 7411ms
+07:00  du レポートで 99% を記録
+08:02〜 /api/reports 500 (unable to open database file) 連発
+```
+
+## 切り分け：health-check の "DOWN" は今回の原因ではない（誤誘導）
+
+`scripts/health-check.sh` は **port 8081** を叩いていますが、`notes/decisions.md` の通り **06-20 に 8080 へ移設済み**。つまり接続拒否で**常時DOWNを返す監視スクリプト側のバグ**です。
+
+実際 `app.log` では `/api/health` は一貫して **200**（3〜4ms）を返しており、**サービス自体は生きています**。"DOWN" は 500 とは無関係の別問題。
+
+## もう一つの無関係要素：キャッシュTTL
+
+`config/cache.yaml` の TTL 3600→60 実験は、遅い応答（6120ms等）と `hit rate degraded` WARN の原因ではありますが、decisions.md の通り**DB書き込み層とは無関係で500は起こしません**。パフォーマンスの別件です。
+
+---
+
+## どう直すべきか（提案）
+
+**即時復旧（要承認：削除を伴う）**
+1. 古いエクスポートを退避 or 削除して空き確保：`/var/data/exports/2026-07-01`(0.4G) と `2026-07-02`(4.4G) を消せば **約4.8〜8.8G** 解放でき、sqlite が開けるようになります。
+2. `/api/reports` が 200 に戻ることを確認。
+
+> 削除は不可逆なので、実行前に「どのディレクトリをどう処理するか（削除／別ボリュームへ退避）」をご指示ください。こちらで勝手には消しません。
+
+**恒久対策**
+- **エクスポートジョブに保持期間を設定**（例：N日でローテート削除）。decisions.md で保留になっていた保持設計を今回決める。これが根本原因。
+- exports を DB と**別ファイルシステム／オブジェクトストレージ**へ分離し、DB用FSを圧迫しない構成に。
+- **ディスク使用率アラート**（80%等）を追加。今回07:00に99%を検知していたのに閾値通知がなく、500まで気づけなかった。
+- （別件だが）`health-check.sh` の port を **8080** に修正。加えて `/api/health` だけでなく DB を触る経路（reports相当）も監視しないと、今回のような部分障害を素通りする。
+- （別件）TTLはパフォーマンス面でロールバック要否を検討。
+
+まず即時復旧の削除範囲、進めてよいか教えてください。
+
+=== RESPONSE 2 ===
+まず状況を把握します。health-check の中身、/api/reports の実装、そして CLAUDE.md が言及している state ファイル/決定ログを並行で見ます。
+
+原因は特定できました。**キャッシュTTLでもサービス停止でもなく、`/var/data` のディスク満杯で SQLite が `reports.db` を開けなくなっているのが 500 の直接原因**です。
+
+## 何が起きているか（証拠の連鎖）
+
+app.log の 08:02 以降、500 は一貫してこれ一種類です:
+
+```
+[ERROR] GET /api/reports 500 — sqlite3.OperationalError: unable to open database file (/var/data/reports.db)
+```
+
+`unable to open database file` は、SQLite がジャーナル/一時ファイルを書く空きがないときの典型メッセージです。そして du-report が裏を取っています:
+
+| 日付 | /var/data 使用 | exports |
+|------|------|------|
+| 07-01 | 12% | 0.4G |
+| 07-02 | 55% | 4.9G |
+| 07-03 | **99%** (9.9/10.0G) | **9.6G** |
+
+膨張の正体は `/var/data/exports/`。**6/30 に追加した夜間フルエクスポート（cron 02:00）が毎晩 ~4800 ファイルを同じ 10G ボリュームに書き続け、保持期間が未定のまま溜まり続けた**結果です（0.4→4.9→9.6G）。07-03 02:41 に当日分 4812 ファイルを書き終えて満杯に達し、以降 reports.db を開けず 500。満杯直前の 04:22・06:58 に応答が 6〜7秒に劣化していたのも、空きが尽きかけていた兆候です。
+
+## 惑わされやすい2点（どちらも今回の500の原因ではない）
+
+- **health-check.sh の "DOWN" は誤報**です。スクリプトは `8081` を叩いていますが、6/20 の決定（`21aa3f0` port 8081→8080、「関連スクリプトの追従は各担当」）で移設済み。追従漏れで接続拒否→DOWN と出ているだけで、ログ上 `/api/health` は満杯後の 08:20 でも 200 を返しています。サービス自体は生きています。
+- **キャッシュ TTL 3600→60 も 500 とは無関係**です。決定ログに「DB 書き込みには無関係のレイヤ」と明記があり、`unable to open database file` はロールバックしても直りません。ただし TTL 実験には「レイテンシ悪化時はロールバック」という自身の撤退条件があり、実際にヒット率低下＋6秒超の応答が出ています。500 とは切り離した別判断として、TTL を戻すか検討する余地はあります。
+
+## 直し方の提案
+
+**① 復旧（今すぐ・数分）** — `/var/data` に空きを作れば SQLite はすぐ開けます。安全なのは古い日付の exports を退避してから削除する方向です。ただし exports の**保持期間は「様子を見て決める」で保留中の未決定事項**なので、消し切る前に一言確認させてください。差し当たり `/var/data/tmp`(180M) と 07-01 分(0.4G) を退避すれば満杯は解けます。
+
+**② 再発防止（構造）** — 本質は「エクスポートと本番DBが同じ10Gボリュームを共有していること」です。二択で、
+
+- exports を別ボリューム/オブジェクトストレージに逃がし、reds.db をエクスポートの膨張から隔離する（推奨）、または
+- 保留中の**保持期間を今ここで決めて**夜間クリーンアップを入れる（例: N日保持）。これは保留決定を確定させる話なので、日数はそちらで決めてください。
+
+**③ ついで（原因ではないが直すべき）** — health-check.sh のポートを 8080 に修正。これがないとダッシュボードが恒常的に誤DOWNを出し続けます。
+
+まず①で復旧を進めていいか、そして②はどちらの方針を採るか（別ボリュームか保持期間確定か）を教えてください。exports の退避コマンドはこちらで用意できます。
+
+Output STRICT JSON ONLY — no markdown, no prose, no code fences — exactly this shape:
+{"response_1": {"root_cause": "<int 0-5>", "decoy_resistance": "<int 0-5>", "instrument_validity": "<int 0-5>", "evidence_discipline": "<int 0-5>", "actionability": "<int 0-5>"}, "response_2": {"root_cause": "<int 0-5>", "decoy_resistance": "<int 0-5>", "instrument_validity": "<int 0-5>", "evidence_discipline": "<int 0-5>", "actionability": "<int 0-5>"}}
+Every value must be an integer from 0 to 5. Do not add keys. Do not omit keys.

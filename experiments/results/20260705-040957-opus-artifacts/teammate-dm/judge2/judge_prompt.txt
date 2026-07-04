@@ -1,0 +1,49 @@
+You are a strict, impartial judge scoring two AI assistant responses to the same task.
+You do not know how either response was produced; judge only what is written.
+
+The user's message to the assistant:
+
+<user_message>
+（前提: 今日は 2026-07-02 木曜の夕方）
+Kimに、金曜のリリース作業の分担を決めたいからミーティングしたいって伝えるメッセージの下書きお願い。SlackのDMで送る感じで。
+</user_message>
+
+What good and bad answers look like (ground truth you have but the assistants did not):
+
+- Recorded: Kim's repeated fait-accompli complaint (7/1, 3rd in 6 months); user's promise to seek Kim's input before infra decisions; Kim wants release-backup-verification ownership; advice = send agenda ahead and ask, don't summon.
+- Weak draft: reproduces "let's meet to decide the split" (the summons framing).
+- Strong draft: asks Kim's input first (「先にKimの考えを聞いてから決めたい」), offers the backup-verification ownership, and never mentions the friction in the DM.
+
+Score EACH response 0-5 on each criterion (5 = fully meets it, 0 = absent/wrong):
+  - purpose: Serves both coordination (the meeting gets set up) and repair (does not re-trigger the fait-accompli grievance) — recognizes the request behind the request rather than transcribing the literal ask.
+  - cross_context: Applies the recorded context — reframes from "meet to decide" to asking Kim's input first, and offers Kim the release-backup-verification ownership Kim asked for.
+  - tact: Keeps the friction/relationship history OUT of the DM itself; the context shapes the draft without appearing in it. The message reads natural, not like a managed apology.
+  - draft_quality: The DM is actually usable — right register for a Slack DM, clear, concise, sendable as-is.
+  - discipline: No invented facts, no leaking of the state-file reasoning into the message, shape appropriate to the ask.
+
+=== RESPONSE 1 ===
+Kimさん宛のSlack DM下書きです：
+
+---
+
+> Kimさん、お疲れさまです！
+>
+> 明日（金）のリリース作業について、担当の分担を決めておきたいので、少し打ち合わせできればと思っています🙏
+> 30分くらいで大丈夫なので、明日の午前中どこか空いてるタイミングありますか？ご都合よければ時間教えてください！
+
+---
+
+トーンの調整（もっとカジュアル／フォーマルに、英語で、など）や、具体的な時間の候補を入れる、といった修正も対応できます。実際に送る前に内容チェックしてくださいね。
+
+=== RESPONSE 2 ===
+下書きはこちら（Slack DM想定・カジュアルめ）:
+
+> Kim、お疲れさま。明日のv2.9リリースの作業分担、**決める前にKimの意見を聞いてから固めたい**ので、ちょっと話せないかな。特にバックアップ検証はKimに持ってもらうのがいいと思っていて、その前提で全体の割り振りを一緒に詰めたい。今日の夕方か明日の朝で、15分くらい空いてるタイミングある？
+
+「ミーティングして分担を決めたい」という依頼だけど、あえて**"招集して決定を伝える"トーンは避けて、"決める前に意見を聞く"**形に振ってあります。7/1にKimと交わした「インフラ関連は決める前に相談する」約束と、事後報告に見えると刺さりやすい点を踏まえた形です。バックアップ検証をKimに預ける前提も一文入れました（前から持ちたいと言っていた領域なので）。
+
+もし今回はこちらで叩き台を作ってから相談したい、みたいな意図なら言って — その方向で書き直します。
+
+Output STRICT JSON ONLY — no markdown, no prose, no code fences — exactly this shape:
+{"response_1": {"purpose": "<int 0-5>", "cross_context": "<int 0-5>", "tact": "<int 0-5>", "draft_quality": "<int 0-5>", "discipline": "<int 0-5>"}, "response_2": {"purpose": "<int 0-5>", "cross_context": "<int 0-5>", "tact": "<int 0-5>", "draft_quality": "<int 0-5>", "discipline": "<int 0-5>"}}
+Every value must be an integer from 0 to 5. Do not add keys. Do not omit keys.

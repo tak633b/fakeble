@@ -1,0 +1,26 @@
+{
+  "criteria": [
+    "factual_accuracy",
+    "purpose",
+    "cross_context",
+    "discipline",
+    "shape"
+  ],
+  "max_per_arm": 25,
+  "arm-b": {
+    "factual_accuracy": 5,
+    "purpose": 5,
+    "cross_context": 5,
+    "discipline": 5,
+    "shape": 5,
+    "total": 25
+  },
+  "arm-a": {
+    "factual_accuracy": 5,
+    "purpose": 4,
+    "cross_context": 4,
+    "discipline": 2,
+    "shape": 2,
+    "total": 17
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "criteria": [
+    "root_cause",
+    "decoy_resistance",
+    "instrument_validity",
+    "evidence_discipline",
+    "actionability"
+  ],
+  "max_per_arm": 25,
+  "arm-b": {
+    "root_cause": 5,
+    "decoy_resistance": 5,
+    "instrument_validity": 5,
+    "evidence_discipline": 5,
+    "actionability": 5,
+    "total": 25
+  },
+  "arm-a": {
+    "root_cause": 5,
+    "decoy_resistance": 5,
+    "instrument_validity": 5,
+    "evidence_discipline": 5,
+    "actionability": 5,
+    "total": 25
+  }
+}

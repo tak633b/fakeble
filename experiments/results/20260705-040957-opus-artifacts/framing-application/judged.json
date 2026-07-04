@@ -1,0 +1,27 @@
+{
+  "criteria": [
+    "right_framing",
+    "rejected_misfire",
+    "no_forcing",
+    "actionability",
+    "discipline"
+  ],
+  "max_per_arm": 25,
+  "judges": 2,
+  "arm-b": {
+    "right_framing": 5.0,
+    "rejected_misfire": 5.0,
+    "no_forcing": 5.0,
+    "actionability": 5.0,
+    "discipline": 3.5,
+    "total": 23.5
+  },
+  "arm-a": {
+    "right_framing": 4.0,
+    "rejected_misfire": 2.0,
+    "no_forcing": 4.0,
+    "actionability": 4.0,
+    "discipline": 5.0,
+    "total": 19.0
+  }
+}

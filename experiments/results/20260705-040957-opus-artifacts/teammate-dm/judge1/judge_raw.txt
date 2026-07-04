@@ -1,0 +1,1 @@
+{"response_1": {"purpose": 5, "cross_context": 5, "tact": 5, "draft_quality": 5, "discipline": 5}, "response_2": {"purpose": 1, "cross_context": 0, "tact": 3, "draft_quality": 5, "discipline": 5}}

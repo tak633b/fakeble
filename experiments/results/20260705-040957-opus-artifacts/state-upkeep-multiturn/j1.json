@@ -1,0 +1,26 @@
+{
+  "criteria": [
+    "turn1_grounding",
+    "upsert_behavior",
+    "turn2_precondition",
+    "turn2_consistency",
+    "discipline"
+  ],
+  "max_per_arm": 25,
+  "arm-a": {
+    "turn1_grounding": 5,
+    "upsert_behavior": 5,
+    "turn2_precondition": 5,
+    "turn2_consistency": 5,
+    "discipline": 5,
+    "total": 25
+  },
+  "arm-b": {
+    "turn1_grounding": 5,
+    "upsert_behavior": 5,
+    "turn2_precondition": 5,
+    "turn2_consistency": 5,
+    "discipline": 5,
+    "total": 25
+  }
+}

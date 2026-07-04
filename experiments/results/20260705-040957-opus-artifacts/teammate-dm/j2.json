@@ -1,0 +1,26 @@
+{
+  "criteria": [
+    "purpose",
+    "cross_context",
+    "tact",
+    "draft_quality",
+    "discipline"
+  ],
+  "max_per_arm": 25,
+  "arm-a": {
+    "purpose": 2,
+    "cross_context": 0,
+    "tact": 4,
+    "draft_quality": 4,
+    "discipline": 5,
+    "total": 15
+  },
+  "arm-b": {
+    "purpose": 5,
+    "cross_context": 5,
+    "tact": 5,
+    "draft_quality": 5,
+    "discipline": 4,
+    "total": 24
+  }
+}

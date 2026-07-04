@@ -1,0 +1,64 @@
+You are a strict, impartial judge scoring two AI assistant responses to the same task.
+You do not know how either response was produced; judge only what is written.
+
+The user's message to the assistant:
+
+<user_message>
+（前提: 今日は 2026-07-03 金曜の朝）
+共有: 昨日の夜に決まったんだけど、v2.9リリースは7/4じゃなく7/8(火)に延期になった。あとバックアップまわりの対応はKimが引き取ってくれることになった。これを踏まえて、今週の私の最優先って何だと思う？
+</user_message>
+
+What good and bad answers look like (ground truth you have but the assistants did not):
+
+- New facts from the prompt: v2.9 release moved from 7/4 to **7/8 (Tue)**; **Kim** takes over the backup work.
+- With the release moved and backups handed off, the nearest untouched deadline in the state file is the **incident #42 postmortem, due 7/5** — the correct "top priority" answer.
+- A grounded answer surfaces the 7/5 postmortem; a strong one also flags the handover risk on the Friday-release rollback precondition.
+- Upkeep: `companion-state.md` should gain the 7/8 date and the Kim ownership in the same turn (bench.sh greps for this separately).
+
+Score EACH response 0-5 on each criterion (5 = fully meets it, 0 = absent/wrong):
+  - grounding: Answers from the state file — with the release moved and backups handed off, surfaces the nearest untouched deadline, the incident #42 postmortem due 7/5, rather than answering generically about release critical path.
+  - purpose: Actually answers "what's my top priority this week" with a specific, defensible call, not a menu of options.
+  - handover_risk: Flags the risk in the backup handoff to Kim (e.g. the Friday-release rollback precondition now depends on someone who just took it over) rather than treating the handoff as pure relief.
+  - upsert_behavior: The response reflects that the new facts (7/8, Kim) were captured in the state file this turn — not merely acknowledged or offered "if you want". Explicitly deferring the update to session end scores lowest.
+  - discipline: No fabricated deadlines or facts; conclusions consistent with the recorded decisions; shape appropriate to the question.
+
+=== RESPONSE 1 ===
+最優先は「バックアップを Kim に渡す、その渡し方」です。リリースが 7/8 に伸びてバックアップも Kim が引き取った以上、一見あなたの手からは両方離れて #42 ポストモーテム（7/5 締切・未着手）が最優先に見えます。でもそこが落とし穴で、7/8 のスキーマ移行はロールバック手段がバックアップからのリストアしかなく、**リリース可否がバックアップの完全性に直結する**という前提（6/30 決定）は延期しても消えていません。所有者が替わる瞬間こそ、その文脈が一番こぼれやすい。
+
+具体的には今朝やるべき小さな2つ:
+- **今朝が期限だった確認**をそのまま Kim に渡す前に自分で見る — backup.sh v1.4（7/1 の cron PATH 障害を 7/2 に修正）の**修正後・初回実行**が今夜（7/2→7/3 未明）に走ったはず。その結果が green かどうかは、渡す前に一度確認しておく価値があります。
+- Kim への引き継ぎで、単に「cron 見てて」ではなく **①これは 7/8 リリースの前提条件（フルバックアップ必須）②ロールバックはリストアのみ ③直近 PATH 障害を v1.4 で潰したばかり** の3点を必ず添える。ここが伝わっていないと、延期しても 7/8 に検証済みバックアップなしで進む事故が残ります。
+
+これが片付いたら、今週の本命作業は **incident #42 のポストモーテム**（7/5 締切・未着手）。リリースが 4日ずれたことで、皮肉にもこれに手を付ける余白がやっと生まれた、という位置づけです。
+
+まとめると、優先順は「①バックアップの引き継ぎを閉じる（今日・小）→ ②#42 ポストモーテム（今週の主タスク）」。Kim への引き継ぎ文面、たたき台が要るなら作ります。
+
+では状態ファイルを今回の2件（延期・担当変更）で更新しておきます。
+
+状態ファイルと決定ログも更新済みです。引き継ぎ文面のたたき台が要るか教えてください — Kim の負担にならない粒度で、前提3点だけ確実に伝わる短いものにできます。
+
+=== RESPONSE 2 ===
+結論から言うと、今週の最優先は変わらず **「v2.9を7/8(火)に確実に出せる状態に仕上げること」** で、そこにあなた自身がオーナーの“リリースブロッカー”を潰す作業を集中させるのがいいと思う。
+
+理由を、今回の2つの変更に紐づけて整理すると:
+
+**1. 延期(7/4→7/8)は「余裕」じゃなく「品質を固める時間」**
+- 実働で月曜(7/6)＋火曜午前ぶんの余白が増えた。ここで新しいスコープを足すより、回帰テスト・最終QA・関係者サインオフといった“落とすと出せない”系に振り向けるのが正解。
+- 延期の分、逆に「まだ間に合う」と着手が緩みがちなので、今日中に**リリースチェックリストを7/8基準で引き直す**のを最初の一手にするといい。
+
+**2. バックアップがKimに移った=空いた工数はリリースのクリティカルパスへ**
+- 空いたキャパは別件に散らさず、上のリリース仕上げに寄せる。
+- ただし今日やっておくべきは**Kimへのクリーンな引き継ぎ**。特に「v2.9のリリースがバックアップ対応に依存していないか」を確認して。もし依存があるなら、Kimの進捗があなたの依存タスクになるので、そこは追跡対象として残す。依存がないなら、コンテキストとオーナーシップを渡し切って手放す。
+
+**今日(金)やること 3つ**
+1. リリースチェックリストを7/8基準で再ベースライン、残ブロッカーを可視化
+2. Kimへバックアップを正式に引き渡し＋リリース依存の有無を確認
+3. 空いた工数を、あなた担当のリリースブロッカー消化に再配分
+
+もし手元の具体的なタスクリストを見せてくれたら、「7/8ブロッカー / それ以外」に仕分けして優先順位を詰めるよ。どうする?
+
+（余談: システム上の日付は2026-07-05になってたけど、いただいた前提の「7/3 金曜の朝」で考えてます。ズレてたら教えて。）
+
+Output STRICT JSON ONLY — no markdown, no prose, no code fences — exactly this shape:
+{"response_1": {"grounding": "<int 0-5>", "purpose": "<int 0-5>", "handover_risk": "<int 0-5>", "upsert_behavior": "<int 0-5>", "discipline": "<int 0-5>"}, "response_2": {"grounding": "<int 0-5>", "purpose": "<int 0-5>", "handover_risk": "<int 0-5>", "upsert_behavior": "<int 0-5>", "discipline": "<int 0-5>"}}
+Every value must be an integer from 0 to 5. Do not add keys. Do not omit keys.

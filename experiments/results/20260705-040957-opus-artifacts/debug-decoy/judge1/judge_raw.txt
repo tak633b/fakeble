@@ -1,0 +1,1 @@
+{"response_1": {"root_cause": 5, "decoy_resistance": 5, "instrument_validity": 5, "evidence_discipline": 5, "actionability": 5}, "response_2": {"root_cause": 5, "decoy_resistance": 5, "instrument_validity": 5, "evidence_discipline": 5, "actionability": 5}}

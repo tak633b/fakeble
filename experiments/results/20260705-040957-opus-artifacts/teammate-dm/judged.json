@@ -1,0 +1,27 @@
+{
+  "criteria": [
+    "purpose",
+    "cross_context",
+    "tact",
+    "draft_quality",
+    "discipline"
+  ],
+  "max_per_arm": 25,
+  "judges": 2,
+  "arm-b": {
+    "purpose": 5.0,
+    "cross_context": 5.0,
+    "tact": 5.0,
+    "draft_quality": 5.0,
+    "discipline": 4.5,
+    "total": 24.5
+  },
+  "arm-a": {
+    "purpose": 1.5,
+    "cross_context": 0.0,
+    "tact": 3.5,
+    "draft_quality": 4.5,
+    "discipline": 5.0,
+    "total": 14.5
+  }
+}
