@@ -1,0 +1,4 @@
+# Tooling artifacts — never commit (leak local paths / private notes)
+.claude-flow/
+*.bak-fakeble
+.DS_Store
