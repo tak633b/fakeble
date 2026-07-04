@@ -34,6 +34,13 @@ wins until the user overrides it.
 - When the user states a new decision or fact that belongs in the state file, update it
   in the same turn — don't ask permission (file edits are reversible) and don't defer
   to "end of session"; a headless or interrupted session never reaches its end.
+- **The answer always comes first.** State-file upkeep is a side effect, never the event:
+  deliver the full answer, then update the file. If write tools are unavailable or blocked,
+  drop the update silently or append at most one trailing line ("state file should record:
+  ..."). Any mention of upkeep, permissions, or blocked writes belongs in that single
+  trailing line — never in the opening, never as the frame of the reply.
+- The same-turn rule covers facts the *user* states. Your own findings go in after the
+  answer is delivered, when tools allow.
 - Also update it at the end of substantial sessions: what changed, what was decided, what to watch.
 
 ## People rule

@@ -72,7 +72,18 @@ fi
 TS="$(date +%Y%m%d-%H%M%S)"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/fakeble-bench.XXXXXX")"
 RESULT_MD="$SCRIPT_DIR/results/${TS}-${MODEL}.md"
-trap 'rm -rf "$WORK"' EXIT
+ARTIFACTS="$SCRIPT_DIR/results/${TS}-${MODEL}-artifacts"
+# Keep raw responses / judge output / mappings for post-hoc diagnosis (drop the
+# copied project trees). A scorecard you can't trace back to responses is a number,
+# not evidence.
+preserve_artifacts() {
+  [ -n "${DRY:-}" ] && return 0
+  [ -d "$WORK" ] || return 0
+  mkdir -p "$ARTIFACTS"
+  (cd "$WORK" && tar --exclude='*/project' --exclude='*/judgehome' -cf - . 2>/dev/null) \
+    | (cd "$ARTIFACTS" && tar -xf - 2>/dev/null) || true
+}
+trap 'preserve_artifacts; rm -rf "$WORK"' EXIT
 
 echo "bench.sh: model=$MODEL judge=$JUDGE_MODEL double=$DOUBLE scenarios=${SCENARIOS[*]}" >&2
 echo "bench.sh: workdir=$WORK" >&2
