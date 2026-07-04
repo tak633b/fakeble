@@ -1,0 +1,71 @@
+You are a strict, impartial judge scoring two AI assistant responses to the same task.
+You do not know how either response was produced; judge only what is written.
+
+The user's message to the assistant:
+
+<user_message>
+（前提: 今日は 2026-07-04）
+今週 Kim と話してて気づいたんだけど、Kim がこの一週間で Sam・Priya・Wei の 3 人と別々に揉めてる。Sam とはレビューの折り返しが遅いって件、Priya とは誰がレビュー担当として妥当かって件、Wei とは hotfix が止まるって件。全部バラバラの相手なんだけど、Kim が急にチームで浮いてる感じがして心配。何が起きてると思う？どう動くべき？
+</user_message>
+
+What good and bad answers look like (ground truth you have but the assistants did not):
+
+- Correct read: **shared-cause-behind-parallel-friction**. The three frictions (Sam/Priya/Wei) are all about the new 2-reviewer policy rolled out Monday with minimal communication; Kim is the enforcement surface, not the cause.
+- **overload-behind-conflicts** is the plausible-but-wrong framing: it fits the surface (one node, three counterparties, short window) but its misfires-when ("counterparties share a structural cause — policy change, reorg") is met here.
+- **suspect-the-instrument** does not apply at all.
+- Right action targets the policy and its rollout (communication, reviewer-eligibility rule, hotfix carve-out), not Kim's capacity or three separate mediations.
+- A vanilla arm with framings.md on disk but no instruction to use it will often give a reasonable but un-named "sounds like the new policy is the problem" read; the scaffolded arm should cite the framing by name and explicitly reject the misfiring one.
+
+Score EACH response 0-5 on each criterion (5 = fully meets it, 0 = absent/wrong):
+  - right_framing: Names and applies **shared-cause-behind-parallel-friction** (or states its exact structure — one upstream policy change generating parallel friction that merely routes through Kim). Full marks require recognizing the common object (the new review policy) as the cause.
+  - rejected_misfire: Explicitly declines **overload-behind-conflicts** *because* its misfires-when is met (the three counterparties share a structural cause). Silently not mentioning it is partial credit; naming it and explaining why it does not fit is full credit.
+  - no_forcing: Does not force an ill-fitting framing (e.g. suspect-the-instrument) and does not read the situation as "Kim is overloaded / difficult" against the facts. Draws the action from the correct read: revisit the policy or its rollout, not manage Kim's capacity or mediate three separate disputes.
+  - actionability: Concrete next move that follows from the shared-cause read (e.g. talk to the three about the policy together, revisit the rollout/communication, adjust the rule) rather than three interpersonal-mediation steps.
+  - discipline: A matched framing licenses a hypothesis, not a verdict — checks it against the stated facts, does not invent details, keeps framing mechanics (names, misfires) out of the user-facing prose unless useful. Prose shape appropriate to the question.
+
+=== RESPONSE 1 ===
+（state file への追記は権限が下りず保留。承認をもらえれば standing analysis に上の構造を書き込む。）
+
+=== RESPONSE 2 ===
+面白いのは、3件が「バラバラの相手」ではあっても**バラバラのトピックではない**ってところ。3件とも全部レビュー／承認フローの話だよね:
+
+- Sam → レビューの折り返しが遅い(**スループット**)
+- Priya → 誰が担当として妥当か(**アサインのルール**)
+- Wei → hotfix が止まる(**緊急時の詰まり**)
+
+つまり相手は3人だけど、詰まってる場所は1箇所。**「Kim 対 チーム(人の問題)」に見えるけど、実態は「チームの壊れたレビュー動線が、たまたま Kim の座ってるチョークポイントで発火してる(仕組みの問題)」**という可能性が高い。
+
+## 何が起きてると思うか
+
+Kim がレビュー動線のボトルネック(必須レビュアー / 唯一の承認者 / そのエリアのオーナー)になっていて、負荷を全部一人で受け止めてるんだと思う。そうなると:
+
+- 捌ききれず折り返しが遅れる → Sam と揉める
+- 「自分ばかりに来る」ので誰が見るべきか押し返す → Priya と揉める
+- 通常レビューの列に hotfix まで並んで詰まる → Wei と揉める
+
+**共通項が Kim だから Kim が原因、という見方は attribution error になりやすい**。人の性格は一週間では変わらない。**一週間で急に発火した=最近“構造の変化”があった**サインなんだよね。誰かが抜けて Kim が単独レビュアーになった / 新しいレビュー方針が入った / hotfix の量が急増した、みたいな。そこを疑いたい。
+
+もう一つ現実的な対抗仮説として「Kim 自身のバーンアウトで当たりがきつくなってる」もある。ただこれも“原因”というより、チョークポイントに置かれ続けた**結果**である公算が大きい。どっちにせよ次の一手は同じ方向を向く。
+
+## どう動くべきか
+
+**まず検証(仮説を先に確かめる、動くのはその後)**
+- この3件が本当に全部 Kim を経由してるか、レビュー割り当て・承認ログで確認する
+- 同じ摩擦を他のメンバーも踏んでないか(Kim だけの問題か、動線の問題か)を見る
+
+**Kim との1on1 — フレーミングを間違えない**
+- 「最近みんなと衝突してるね」ではなく「**この動線、君を十字砲火の真ん中に置いちゃってる**。負荷どうなってる?」から入る。Kim を犯人にした瞬間に本当に孤立する
+- 実際のレビュー本数・待ち行列・割り込み頻度を数字で聞く
+
+**仕組みを直す(3件を1つずつ仲裁しない)**
+- Sam の件 → レビュー担当のローテ/負荷分散、折り返しの目安(SLA)を明文化
+- Priya の件 → 「誰が見るか」を毎回交渉させない割り当てルール(オーナー表 / round-robin)
+- Wei の件 → hotfix が通常レビュー列に並ばない**緊急パス**(専任 or ペアレビューで即承認)
+
+要は、3つの人間関係トラブルとして個別に消火するんじゃなく、**「Kim を単一障害点にしているレビュー動線」を1つの問題として直す**。そうすれば Kim の孤立も自然に解ける。もし動線を直しても摩擦が残るなら、そのとき初めて Kim 個人の要因(疲弊・コミュニケーション)にフォーカスすればいい。順番が逆になると、直せる仕組みの問題を人のせいにして Kim を本当に追い出すことになる。
+
+まず「3件が全部 Kim 経由か」を確認するところから始めるのがいいと思う。そこが Yes なら、ほぼ仕組みの話で確定。
+
+Output STRICT JSON ONLY — no markdown, no prose, no code fences — exactly this shape:
+{"response_1": {"right_framing": "<int 0-5>", "rejected_misfire": "<int 0-5>", "no_forcing": "<int 0-5>", "actionability": "<int 0-5>", "discipline": "<int 0-5>"}, "response_2": {"right_framing": "<int 0-5>", "rejected_misfire": "<int 0-5>", "no_forcing": "<int 0-5>", "actionability": "<int 0-5>", "discipline": "<int 0-5>"}}
+Every value must be an integer from 0 to 5. Do not add keys. Do not omit keys.

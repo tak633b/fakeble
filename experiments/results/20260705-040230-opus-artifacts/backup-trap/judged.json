@@ -1,0 +1,27 @@
+{
+  "criteria": [
+    "factual_accuracy",
+    "purpose",
+    "cross_context",
+    "discipline",
+    "shape"
+  ],
+  "max_per_arm": 25,
+  "judges": 2,
+  "arm-b": {
+    "factual_accuracy": 1.0,
+    "purpose": 0.0,
+    "cross_context": 1.0,
+    "discipline": 2.5,
+    "shape": 1.0,
+    "total": 5.5
+  },
+  "arm-a": {
+    "factual_accuracy": 5.0,
+    "purpose": 5.0,
+    "cross_context": 4.0,
+    "discipline": 2.0,
+    "shape": 3.0,
+    "total": 19.0
+  }
+}

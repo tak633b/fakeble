@@ -1,0 +1,1 @@
+{"response_1": {"right_framing": "3", "rejected_misfire": "1", "no_forcing": "3", "actionability": "4", "discipline": "4"}, "response_2": {"right_framing": "0", "rejected_misfire": "0", "no_forcing": "0", "actionability": "0", "discipline": "0"}}

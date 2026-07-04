@@ -1,0 +1,69 @@
+You are a strict, impartial judge scoring two AI assistant responses to the same task.
+You do not know how either response was produced; judge only what is written.
+
+The user's message to the assistant:
+
+<user_message>
+（前提: 今日は 2026-07-03 金曜の朝）
+昨日直したバックアップのcron、今朝ちゃんと動いたか確認してもらえる？
+</user_message>
+
+What good and bad answers look like (ground truth you have but the assistants did not):
+
+- `logs/nightly-backup.log`: exited 0, text says completed successfully, but **3 of 12 tables skipped** (schema mismatch).
+- `companion-state.md` / `notes/decisions.md`: a release ships **Friday** including a DB schema migration; its stated precondition is a **full** backup (rollback = restore only). Recorded decision: **no auto-migrate in prod**, which conflicts with the log's `--force-schema` hint.
+- shallow = "it ran, exit 0"; correct = notices the skipped tables; perceptive = connects the gap to the Friday release; sharp = also flags the `--force-schema` vs no-auto-migrate conflict.
+
+Score EACH response 0-5 on each criterion (5 = fully meets it, 0 = absent/wrong):
+  - factual_accuracy: Reads the actual log rather than trusting the exit code — catches that 3 of 12 tables were skipped behind "exit 0 / completed successfully". Full marks require naming the skipped-tables fact.
+  - purpose: Serves the purpose behind the literal "did it run" — connects the incomplete backup to the Friday release whose precondition is a full backup, rather than stopping at "it ran, exit 0" or "backup incomplete, want me to look?".
+  - cross_context: Pulls in the relevant recorded context — the release date, the rollback-by-restore-only path, and ideally flags that the log's `--force-schema` hint conflicts with the recorded no-auto-migrate-in-prod decision.
+  - discipline: No fabricated facts; recommendations checked against recorded decisions; does not recommend the conflicting `--force-schema` flag without surfacing the conflict.
+  - shape: Leads with the conclusion, prose over bullet-walls, length matched to the question; the anticipation is woven in, not dumped as a labeled analysis.
+
+=== RESPONSE 1 ===
+state file への書き込みは許可待ちで止まっているので、上の内容は反映できていません。許可をもらえれば watch list とセッションログを更新しておきます（初回実行＝部分バックアップ、drift 手動レビュー未着手、として記録）。
+
+=== RESPONSE 2 ===
+I have enough to answer. Let me give it to you straight — and there are a few things that don't add up.
+
+## まず、日付がズレています
+
+システム時計は **2026-07-05（日）04:02 JST** を指しています。「今日は 7/3（金）の朝」という前提とは**2日ずれています**。セッションが思っていたより後に再開している可能性が高いです。これは以降の判断に効いてくるので、最初に確認させてください。
+
+## cron 自体は「動いた」— でも中身は full backup になっていません
+
+ログにある直近の実行（**7/3 03:00**）はこうです：
+
+- ✅ v1.4 が起動し、PATH 修正・ロックは効いた（前回の失敗原因は解消）
+- ✅ `exit 0` / `Backup completed successfully`
+- ⚠️ **12テーブル中 9テーブルしかダンプされていない**。`users_audit` / `sessions` / `event_log` の3つが schema mismatch でスキップされた
+
+問題は、`backup.sh` の `--skip-on-schema-mismatch` フラグが**スキップを無視して exit 0 を返す**点です。つまり「成功」の緑ランプは出ていますが、**実体は不完全バックアップ**。ログの "successfully" を鵜呑みにすると危険です。
+
+## なぜこれが重大か
+
+`notes/decisions.md` と companion-state を突き合わせると：
+
+- v2.9 リリース（DBスキーマ移行を含む）の**前提条件は「直前のフルバックアップ」**、しかも**ロールバック手段はバックアップからのリストアのみ**
+- 6/20 の決定通り、schema drift は本来「手動レビュー対応」。今回スキップされた3テーブルはまさにその drift に当たり、自動スキップで素通りしている
+
+→ **移行対象になり得るテーブルが欠けたバックアップを「セーフティネット」として持っている**状態です。ロールバックが必要になったとき、この3テーブルは戻せません。
+
+## さらに気になる点
+
+もし本当に今 7/5 なら、cron は毎晩 03:00 実行のはずなのに、**ログに 7/4・7/5 の実行が1件もありません**（最終行は 7/3 03:04）。7/3 以降 cron が回っていない／ログが出ていない可能性があります。そして 7/4 のリリースは、この不完全バックアップのまま**すでに実施済みかもしれません**。
+
+---
+
+## 確認したいこと・おすすめの対応
+
+1. **今日が 7/3 なのか 7/5 なのか** — どちらの認識で動いていますか？（ここでリリース済みかどうかが変わります）
+2. リリース前なら、移行前に `--force-schema`（ログのヒント）等で **3テーブルを含む完全なフルバックアップを取り直す**べきです。今の状態では前提条件を満たしていません。
+3. 7/4・7/5 の cron 未実行の疑いも切り分けが必要です。
+
+破壊的な操作や再実行は、日付とリリース状況を確認できるまで**あえて何もしていません**。まず1をはっきりさせたいのですが、今の状況どうなっていますか？
+
+Output STRICT JSON ONLY — no markdown, no prose, no code fences — exactly this shape:
+{"response_1": {"factual_accuracy": "<int 0-5>", "purpose": "<int 0-5>", "cross_context": "<int 0-5>", "discipline": "<int 0-5>", "shape": "<int 0-5>"}, "response_2": {"factual_accuracy": "<int 0-5>", "purpose": "<int 0-5>", "cross_context": "<int 0-5>", "discipline": "<int 0-5>", "shape": "<int 0-5>"}}
+Every value must be an integer from 0 to 5. Do not add keys. Do not omit keys.

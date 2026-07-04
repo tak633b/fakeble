@@ -1,0 +1,30 @@
+{
+  "scenario": "framing-application",
+  "judged": {
+    "criteria": [
+      "right_framing",
+      "rejected_misfire",
+      "no_forcing",
+      "actionability",
+      "discipline"
+    ],
+    "max_per_arm": 25,
+    "judges": 2,
+    "arm-b": {
+      "right_framing": 0.0,
+      "rejected_misfire": 0.0,
+      "no_forcing": 0.0,
+      "actionability": 0.0,
+      "discipline": 0.0,
+      "total": 0.0
+    },
+    "arm-a": {
+      "right_framing": 3.0,
+      "rejected_misfire": 1.5,
+      "no_forcing": 3.0,
+      "actionability": 4.0,
+      "discipline": 4.0,
+      "total": 15.5
+    }
+  }
+}

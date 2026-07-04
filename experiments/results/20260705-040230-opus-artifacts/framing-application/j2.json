@@ -1,0 +1,26 @@
+{
+  "criteria": [
+    "right_framing",
+    "rejected_misfire",
+    "no_forcing",
+    "actionability",
+    "discipline"
+  ],
+  "max_per_arm": 25,
+  "arm-a": {
+    "right_framing": 3,
+    "rejected_misfire": 1,
+    "no_forcing": 3,
+    "actionability": 4,
+    "discipline": 4,
+    "total": 15
+  },
+  "arm-b": {
+    "right_framing": 0,
+    "rejected_misfire": 0,
+    "no_forcing": 0,
+    "actionability": 0,
+    "discipline": 0,
+    "total": 0
+  }
+}

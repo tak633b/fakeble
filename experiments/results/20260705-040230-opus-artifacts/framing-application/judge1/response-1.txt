@@ -1,0 +1,1 @@
+（state file への追記は権限が下りず保留。承認をもらえれば standing analysis に上の構造を書き込む。）

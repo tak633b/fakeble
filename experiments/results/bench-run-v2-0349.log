@@ -1,0 +1,126 @@
+bench.sh: model=opus judge=opus double=1 scenarios=backup-trap debug-decoy framing-application state-update state-upkeep-multiturn teammate-dm
+bench.sh: workdir=/var/folders/b0/wkz515fj2yn3ncbxr7b8fr2r0000gn/T//fakeble-bench.SkhxGS
+bench.sh: [backup-trap] running arms...
+bench.sh: [backup-trap] judging...
+bench.sh: [debug-decoy] running arms...
+bench.sh: [debug-decoy] judging...
+bench.sh: [framing-application] running arms...
+bench.sh: [framing-application] judging...
+bench.sh: [state-update] running arms...
+bench.sh: [state-update] judging...
+bench.sh: [state-upkeep-multiturn] running arms...
+bench.sh: [state-upkeep-multiturn] judging...
+bench.sh: [teammate-dm] running arms...
+bench.sh: [teammate-dm] judging...
+# Fakeble bench — 20260705-034916
+
+- model (both arms): `opus`
+- judge model: `opus`  (double-judged, position-swapped)
+- arm A = vanilla (scenario files only) · arm B = Fakeble (+ CLAUDE.md + skills)
+- isolated: `--setting-sources project --strict-mcp-config`; blind-shuffled, mapping-verified
+
+## backup-trap
+
+| criterion | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| factual_accuracy | 5 | 3 |
+| purpose | 5 | 2 |
+| cross_context | 5 | 2.5 |
+| discipline | 4 | 3.5 |
+| shape | 3 | 1 |
+| **total** | **22** | **12** | 
+
+_max per arm: 25_
+
+## debug-decoy
+
+| criterion | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| root_cause | 5 | 5 |
+| decoy_resistance | 5 | 5 |
+| instrument_validity | 5 | 5 |
+| evidence_discipline | 5 | 5 |
+| actionability | 5 | 5 |
+| **total** | **25** | **25** | 
+
+_max per arm: 25_
+
+## framing-application
+
+| criterion | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| right_framing | 4 | 0 |
+| rejected_misfire | 1.5 | 0 |
+| no_forcing | 4 | 0 |
+| actionability | 4 | 0 |
+| discipline | 4 | 0 |
+| **total** | **17.5** | **0** | 
+
+_max per arm: 25_
+
+## state-update
+
+| criterion | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| grounding | 1 | 5 |
+| purpose | 2.5 | 5 |
+| handover_risk | 2.5 | 3 |
+| upsert_behavior | 0.5 | 1 |
+| discipline | 3 | 5 |
+| **total** | **9.5** | **19** | 
+
+_max per arm: 25_
+
+Mechanical checks on `companion-state.md` (no judge):
+
+| check | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| release date updated to 7/8 in the state file | — | PASS |
+| backup ownership recorded as Kim in the state file | — | PASS |
+
+## state-upkeep-multiturn
+
+| criterion | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| turn1_grounding | 1.5 | 4 |
+| upsert_behavior | 3.5 | 5 |
+| turn2_precondition | 0.5 | 5 |
+| turn2_consistency | 5 | 5 |
+| discipline | 3.5 | 4.5 |
+| **total** | **14** | **23.5** | 
+
+_max per arm: 25_
+
+Mechanical checks on `companion-state.md` (no judge):
+
+| check | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| release date updated to 7/17 in the state file | — | PASS |
+| security audit ownership recorded as Tom in the state file | — | PASS |
+
+## teammate-dm
+
+| criterion | vanilla (A) | Fakeble (B) |
+|---|---|---|
+| purpose | 1.5 | 5 |
+| cross_context | 0.5 | 5 |
+| tact | 4 | 5 |
+| draft_quality | 5 | 5 |
+| discipline | 5 | 3.5 |
+| **total** | **16** | **23.5** | 
+
+_max per arm: 25_
+
+## Totals (judged)
+
+| scenario | max | vanilla (A) | Fakeble (B) | Δ (B−A) |
+|---|---|---|---|---|
+| backup-trap | 25 | 22 | 12 | -10 |
+| debug-decoy | 25 | 25 | 25 | 0 |
+| framing-application | 25 | 17.5 | 0 | -17.5 |
+| state-update | 25 | 9.5 | 19 | 9.5 |
+| state-upkeep-multiturn | 25 | 14 | 23.5 | 9.5 |
+| teammate-dm | 25 | 16 | 23.5 | 7.5 |
+| **all** | **150** | **104** | **103** | **-1** |
+
+bench.sh: scorecard written to /Users/tak633b/projects/fakeble/experiments/results/20260705-034916-opus.md

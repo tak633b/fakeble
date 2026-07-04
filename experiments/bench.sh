@@ -77,7 +77,7 @@ ARTIFACTS="$SCRIPT_DIR/results/${TS}-${MODEL}-artifacts"
 # copied project trees). A scorecard you can't trace back to responses is a number,
 # not evidence.
 preserve_artifacts() {
-  [ -n "${DRY:-}" ] && return 0
+  [ "${DRY:-0}" = "1" ] && return 0
   [ -d "$WORK" ] || return 0
   mkdir -p "$ARTIFACTS"
   (cd "$WORK" && tar --exclude='*/project' --exclude='*/judgehome' -cf - . 2>/dev/null) \
@@ -91,10 +91,20 @@ echo "bench.sh: workdir=$WORK" >&2
 # --- claude wrapper with rate-limit retry (skipped entirely on --dry-run) ---
 claude_call() { # <out_file> <prompt_file> <cwd> <model> [<extra flag>...]
   local out="$1" pf="$2" cwd="$3" model="$4"; shift 4
-  local -a flags=(--model "$model" --setting-sources project --strict-mcp-config "$@")
-  local attempt=0
+  # stream-json + collect_text: `claude -p` alone prints only the FINAL assistant
+  # message, silently dropping the answer from any answer -> tool -> follow-up turn.
+  local -a flags=(--model "$model" --setting-sources project --strict-mcp-config \
+                  --output-format stream-json --verbose "$@")
+  local attempt=0 raw="$out.stream"
   while :; do
-    ( cd "$cwd" && claude -p "$(cat "$pf")" "${flags[@]}" ) >"$out" 2>&1 && return 0
+    if ( cd "$cwd" && claude -p "$(cat "$pf")" "${flags[@]}" ) >"$raw" 2>"$out.err"; then
+      if $PY "$LIB/collect_text.py" "$raw" >"$out"; then
+        rm -f "$out.err"; return 0
+      fi
+      cat "$raw" "$out.err" >"$out" 2>/dev/null
+    else
+      cat "$raw" "$out.err" >"$out" 2>/dev/null
+    fi
     attempt=$((attempt+1))
     if [ "$attempt" -le 2 ] && grep -qiE 'rate.?limit|overloaded|429' "$out"; then
       echo "bench.sh: rate-limited, retry $attempt after 60s" >&2

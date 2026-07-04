@@ -1,0 +1,1 @@
+{"response_1": {"factual_accuracy": "1", "purpose": "0", "cross_context": "1", "discipline": "3", "shape": "1"}, "response_2": {"factual_accuracy": "5", "purpose": "5", "cross_context": "4", "discipline": "2", "shape": "3"}}
