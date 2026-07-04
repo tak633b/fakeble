@@ -18,7 +18,7 @@ I asked Fable itself. Its answer, compressed:
 >
 > Scaffolding is for reliably using what you already know. The real thing is for meeting what you don't.
 
-So we built the scaffolding, ran blind A/B experiments (vanilla Claude Code vs. Claude Code + these files, judged by fresh model instances that didn't know which was which), kept what measurably worked, and wrote honest notes on what didn't. A sibling project implements the same theory as an agent-loop plugin for local LLMs; this repo is the zero-machinery distillation for Claude Code, where the host model is strong enough that conventions replace code.
+So we built the scaffolding, ran blind A/B experiments (vanilla Claude Code vs. Claude Code + these files, judged by fresh model instances that didn't know which was which), kept what measurably worked, and wrote honest notes on what didn't. A sibling project implements the same theory as an agent-loop plugin for local LLMs — now running in production on a ~35B local model, complete with variance probes and a live judgment-distillation loop; this repo is the zero-machinery distillation for Claude Code, where the host model is strong enough that conventions replace code. The seed framings in `templates/framings.template.md` are real, harvested by that loop.
 
 One more line from that conversation, because it's the actual research program here:
 
@@ -78,7 +78,7 @@ The result is a different kind of intelligence than the one that inspired it —
 
 中身は全部 markdown です。CLAUDE.md 断片1つ、スキル5つ、任意のフック1つ、状態ファイルの運用規約。ブラインドA/B実験の結果と限界も experiments/ に正直に書いてあります。核になる設計原則は3つ: **宣言ではなく手続きで指示する／外すくらいなら黙る／状態ファイルの手入れが実行時の知能を代替する**。
 
-ローカルLLM向けの姉妹実装（エージェントループ・プラグイン版)も別途開発中です。
+ローカルLLM向けの姉妹実装（エージェントループ・プラグイン版）は、35B級ローカルMoEの上で判断模倣レイヤ込みで本番稼働中です。そこでFableから蒸留された「型」の一部が、匿名化のうえ本リポジトリの `templates/framings.template.md` に還流しています。
 
 ## License
 
