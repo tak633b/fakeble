@@ -82,3 +82,25 @@ people-tasks, based on outputs the current model never produced. We restored the
 pre-swap grades by hand. Rule: *when the executing model changes, quarantine the
 grading queue until the change is verified; a competence map poisoned by a
 different model's failures is worse than no map.*
+
+## 5. Related work: the workspace paper
+
+The day these notes were written, Anthropic's interpretability team published
+["Verbalizable Representations Form a Global Workspace in Language Models"](https://transformer-circuits.pub/2026/workspace/index.html)
+(Gurnee, Sofroniew, Lindsey et al., July 2026). It shows — by direct
+measurement, via a per-layer "J-lens" readout — that models maintain a small
+privileged set of verbalizable representations (~25 concepts at a time, under
+10% of activation variance) atop a much larger volume of automatic processing,
+and that this workspace holds assessments the model never says out loud:
+noticing a bug in code, flagging a prompt injection, strategic deliberation.
+
+That is the internal view of the boundary this repo works from the outside.
+Fakeble's premise has been that "perceptiveness" is mostly *what you do with
+what the model already noticed* — the silence rule, the confidence threshold,
+the same-turn harvest are all policies for converting noticed-but-unsaid
+content into action at the right moment. The workspace paper suggests the
+noticed-but-unsaid layer is real, measurable, and narrow. It also offers a
+plausible frame for finding #2 above: an instruction injected into the prompt
+competes for a ~25-slot serial workspace; a norms file that is merely
+*available* may never get lifted into it by a small model. (That extrapolation
+is ours, not the paper's.)
