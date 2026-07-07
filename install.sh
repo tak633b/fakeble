@@ -13,7 +13,7 @@ echo
 
 # 1. Skills
 mkdir -p "$SKILLS_DIR"
-for skill in companion-state catchup hypothesis-ledger framing-library self-calibration; do
+for skill in bootstrap companion-state catchup hypothesis-ledger framing-library self-calibration escalation-queue intent-map; do
   if [ -e "$SKILLS_DIR/$skill" ]; then
     echo "  skip skill '$skill' (already exists at $SKILLS_DIR/$skill)"
   else

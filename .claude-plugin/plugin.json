@@ -1,7 +1,7 @@
 {
   "name": "fakeble",
-  "version": "0.2.0",
-  "description": "Scaffolding that makes Claude Code feel more perceptive and anticipating — seven markdown skills for companion-style work. Use for long-running advisory sessions, catching up on a user's ongoing situation, tracking evidence during investigations, banking reusable framings, and self-calibration.",
+  "version": "0.3.0",
+  "description": "Scaffolding that makes Claude Code feel more perceptive and anticipating — eight markdown skills for companion-style work. Use for long-running advisory sessions, catching up on a user's ongoing situation, tracking evidence during investigations, banking reusable framings, and self-calibration.",
   "author": {
     "name": "tak633b"
   },
@@ -23,6 +23,7 @@
     "./skills/hypothesis-ledger",
     "./skills/framing-library",
     "./skills/self-calibration",
-    "./skills/escalation-queue"
+    "./skills/escalation-queue",
+    "./skills/intent-map"
   ]
 }

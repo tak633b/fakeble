@@ -36,10 +36,12 @@ One more line from that conversation, because it's the actual research program h
 | `skills/self-calibration` | Counterfactual salience checks, variance probes, a mistake log | `~/.claude/skills/` |
 | `skills/bootstrap` | Day-zero interview that generates your first state file and framings | `~/.claude/skills/` |
 | `skills/escalation-queue` | Bank frontier-depth questions; distill answered ones into framings | `~/.claude/skills/` |
+| `skills/intent-map` | Per-user dictionary from utterance patterns to what they actually want; nuance as lookup | `~/.claude/skills/` |
 | `hooks/reinjection` | Optional anti-drift reminder for very long sessions (off by default) | `~/.claude/settings.json` |
 | `templates/` | Starting points: state file, framings library, style few-shot | your project |
 | `experiments/` | Reproducible A/B scenarios, method, and blind-judged results | reference |
 | `docs/design.md` | The full theory: what transfers, what converts, what doesn't, and why | reference |
+| `docs/field-notes-2026-07.md` | Production findings: intent map 42%→90%, why small models ignore norm files, plan discipline | reference |
 
 ## Install
 
