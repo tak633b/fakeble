@@ -104,3 +104,25 @@ plausible frame for finding #2 above: an instruction injected into the prompt
 competes for a ~25-slot serial workspace; a norms file that is merely
 *available* may never get lifted into it by a small model. (That extrapolation
 is ours, not the paper's.)
+
+## 6. Lens fitting language colors the readout, not the discrimination
+
+We fit an official-implementation Jacobian lens for gemma-3-12b-it on a
+41-text Japanese-majority corpus (70% JA) and dueled it against neuronpedia's
+1000-prompt English-wikitext lens on the same model:
+
+- JA implicit-state separation: the JA lens won 5/5 states in absolute gap
+  (+15.3 vs +11.2 pooled) — but **cohen's d was identical** (1.98 vs 1.955).
+  The JA fit amplifies JA concept scores across the board (signal AND
+  control); it does not discriminate better.
+- The smoking gun: on an *English* prompt, the JA lens's mid-stack readouts
+  are Japanese tokens (とても, 非常に…). **The fit corpus's language
+  distribution colors the lens's output vocabulary itself.**
+- EN-control score dipped slightly (−2.3, ~6%) under the JA lens.
+
+Operational rules that follow: (1) raw scores are not comparable across
+lenses — normalize (effect size, separation) or don't compare; (2) choose
+fit language by *use*: for detection metrics, an English corpus suffices;
+for human-readable heatmaps in Japanese, fit on Japanese — the readout
+vocabulary follows the corpus. A 41-prompt fit was enough to reproduce the
+paper-style layer structure on Apple Silicon in ~6h for a 12B dense model.
